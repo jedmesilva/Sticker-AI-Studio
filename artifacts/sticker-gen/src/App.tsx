@@ -19,10 +19,18 @@ if (!clerkPubKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
 }
 
+// Handle both full URLs and relative paths from Clerk's router callbacks
 function stripBase(path: string): string {
-  return basePath && path.startsWith(basePath)
-    ? path.slice(basePath.length) || "/"
-    : path;
+  let relative = path;
+  try {
+    const url = new URL(path);
+    relative = url.pathname + url.search + url.hash;
+  } catch {
+    // already a relative path
+  }
+  return basePath && relative.startsWith(basePath)
+    ? relative.slice(basePath.length) || "/"
+    : relative;
 }
 
 function SignInPage() {
@@ -30,7 +38,13 @@ function SignInPage() {
   // pane in the workspace toolbar. More information can be found in the Replit docs.
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+      <SignIn
+        routing="path"
+        path={`${basePath}/sign-in`}
+        signUpUrl={`${basePath}/sign-up`}
+        fallbackRedirectUrl="/"
+        forceRedirectUrl="/"
+      />
     </div>
   );
 }
@@ -40,7 +54,13 @@ function SignUpPage() {
   // pane in the workspace toolbar. More information can be found in the Replit docs.
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+      <SignUp
+        routing="path"
+        path={`${basePath}/sign-up`}
+        signInUrl={`${basePath}/sign-in`}
+        fallbackRedirectUrl="/"
+        forceRedirectUrl="/"
+      />
     </div>
   );
 }
