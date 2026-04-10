@@ -10,4 +10,6 @@ import type { GenerateOpenaiImageBodySize } from "./generateOpenaiImageBodySize"
 export interface GenerateOpenaiImageBody {
   prompt: string;
   size?: GenerateOpenaiImageBodySize;
+  /** Optional base64-encoded reference image to guide generation */
+  referenceImageData?: string;
 }

@@ -64,6 +64,10 @@ export const GetRecentStickersResponse = zod.array(
 export const GenerateOpenaiImageBody = zod.object({
   prompt: zod.string(),
   size: zod.enum(["1024x1024", "512x512", "256x256"]).optional(),
+  referenceImageData: zod
+    .string()
+    .optional()
+    .describe("Optional base64-encoded reference image to guide generation"),
 });
 
 export const GenerateOpenaiImageResponse = zod.object({

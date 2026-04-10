@@ -1,5 +1,8 @@
 import { Router, type IRouter } from "express";
-import { generateImageBuffer } from "@workspace/integrations-openai-ai-server/image";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { generateImageBuffer, editImages } from "@workspace/integrations-openai-ai-server/image";
 import { GenerateOpenaiImageBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -11,13 +14,22 @@ router.post("/openai/generate-image", async (req, res): Promise<void> => {
     return;
   }
 
-  const { prompt, size } = parsed.data;
+  const { prompt, referenceImageData } = parsed.data;
+  const stickerPrompt = `A cute sticker of: ${prompt}. Sticker style, clean edges, vibrant colors, cartoon illustration, high quality`;
 
-  const validSize = (size as "1024x1024" | "512x512" | "256x256") ?? "1024x1024";
-  const buffer = await generateImageBuffer(
-    `A cute sticker of: ${prompt}. Sticker style, white background, clean edges, vibrant colors, cartoon illustration, high quality`,
-    validSize
-  );
+  let buffer: Buffer;
+
+  if (referenceImageData) {
+    const tmpFile = path.join(os.tmpdir(), `ref-${Date.now()}.png`);
+    try {
+      fs.writeFileSync(tmpFile, Buffer.from(referenceImageData, "base64"));
+      buffer = await editImages([tmpFile], stickerPrompt);
+    } finally {
+      try { fs.unlinkSync(tmpFile); } catch {}
+    }
+  } else {
+    buffer = await generateImageBuffer(stickerPrompt, "1024x1024");
+  }
 
   res.json({ b64_json: buffer.toString("base64") });
 });

@@ -162,6 +162,9 @@ components:
         size:
           type: string
           enum: ["1024x1024", "512x512", "256x256"]
+        referenceImageData:
+          type: string
+          description: Optional base64-encoded reference image to guide generation
       required:
         - prompt
     GenerateOpenaiImageResponse:
