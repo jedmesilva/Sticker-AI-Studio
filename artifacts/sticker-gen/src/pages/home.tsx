@@ -63,7 +63,7 @@ export default function Home() {
     try {
       // 1. Generate image
       const imageRes = await generateImage.mutateAsync({
-        data: { prompt: values.prompt, size: "256x256" },
+        data: { prompt: values.prompt, size: "1024x1024" },
       });
 
       if (!imageRes.b64_json) {
