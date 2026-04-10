@@ -1,6 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
-import { db, stickersTable } from "@workspace/db";
+import { supabase } from "../../lib/supabase";
 import {
   CreateStickerBody,
   DeleteStickerParams,
@@ -10,10 +9,23 @@ import {
 const router: IRouter = Router();
 
 router.get("/stickers", async (_req, res): Promise<void> => {
-  const stickers = await db
-    .select()
-    .from(stickersTable)
-    .orderBy(desc(stickersTable.createdAt));
+  const { data, error } = await supabase
+    .from("stickers")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+    return;
+  }
+
+  const stickers = (data ?? []).map((s) => ({
+    id: s.id,
+    prompt: s.prompt,
+    imageData: s.image_data,
+    createdAt: s.created_at,
+  }));
+
   res.json(stickers);
 });
 
@@ -24,26 +36,46 @@ router.post("/stickers", async (req, res): Promise<void> => {
     return;
   }
 
-  const [sticker] = await db
-    .insert(stickersTable)
-    .values({
-      prompt: parsed.data.prompt,
-      imageData: parsed.data.imageData,
-    })
-    .returning();
+  const { data, error } = await supabase
+    .from("stickers")
+    .insert({ prompt: parsed.data.prompt, image_data: parsed.data.imageData })
+    .select()
+    .single();
 
-  res.status(201).json(sticker);
+  if (error) {
+    res.status(500).json({ error: error.message });
+    return;
+  }
+
+  res.status(201).json({
+    id: data.id,
+    prompt: data.prompt,
+    imageData: data.image_data,
+    createdAt: data.created_at,
+  });
 });
 
 router.get("/stickers/recent", async (req, res): Promise<void> => {
   const parsed = GetRecentStickersQueryParams.safeParse(req.query);
   const limit = parsed.success && parsed.data.limit ? parsed.data.limit : 12;
 
-  const stickers = await db
-    .select()
-    .from(stickersTable)
-    .orderBy(desc(stickersTable.createdAt))
+  const { data, error } = await supabase
+    .from("stickers")
+    .select("*")
+    .order("created_at", { ascending: false })
     .limit(limit);
+
+  if (error) {
+    res.status(500).json({ error: error.message });
+    return;
+  }
+
+  const stickers = (data ?? []).map((s) => ({
+    id: s.id,
+    prompt: s.prompt,
+    imageData: s.image_data,
+    createdAt: s.created_at,
+  }));
 
   res.json(stickers);
 });
@@ -57,12 +89,19 @@ router.delete("/stickers/:id", async (req, res): Promise<void> => {
     return;
   }
 
-  const [deleted] = await db
-    .delete(stickersTable)
-    .where(eq(stickersTable.id, params.data.id))
-    .returning();
+  const { data, error } = await supabase
+    .from("stickers")
+    .delete()
+    .eq("id", params.data.id)
+    .select()
+    .single();
 
-  if (!deleted) {
+  if (error) {
+    res.status(404).json({ error: "Sticker not found" });
+    return;
+  }
+
+  if (!data) {
     res.status(404).json({ error: "Sticker not found" });
     return;
   }
