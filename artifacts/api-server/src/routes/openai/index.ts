@@ -87,22 +87,39 @@ router.post("/openai/generate-image", async (req, res): Promise<void> => {
 
   let buffer: Buffer;
 
-  if (referenceImageData) {
-    const tmpFile = path.join(os.tmpdir(), `ref-${Date.now()}.png`);
-    try {
-      fs.writeFileSync(tmpFile, Buffer.from(referenceImageData, "base64"));
-      buffer = await editImages([tmpFile], stickerPrompt);
-    } finally {
-      try { fs.unlinkSync(tmpFile); } catch {}
+  try {
+    if (referenceImageData) {
+      const tmpFile = path.join(os.tmpdir(), `ref-${Date.now()}.png`);
+      try {
+        fs.writeFileSync(tmpFile, Buffer.from(referenceImageData, "base64"));
+        buffer = await editImages([tmpFile], stickerPrompt);
+      } finally {
+        try { fs.unlinkSync(tmpFile); } catch {}
+      }
+    } else {
+      const response = await openai.images.generate({
+        model: "gpt-image-1",
+        prompt: stickerPrompt,
+        size: "1024x1024",
+      });
+      const base64 = response.data[0]?.b64_json ?? "";
+      buffer = Buffer.from(base64, "base64");
     }
-  } else {
-    const response = await openai.images.generate({
-      model: "gpt-image-1",
-      prompt: stickerPrompt,
-      size: "1024x1024",
-    });
-    const base64 = response.data[0]?.b64_json ?? "";
-    buffer = Buffer.from(base64, "base64");
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    const isSafetyBlock =
+      message.includes("safety system") ||
+      message.includes("content_policy") ||
+      message.includes("content policy") ||
+      message.includes("rejected");
+    if (isSafetyBlock) {
+      res.status(422).json({
+        error: "Esse prompt foi bloqueado pelo filtro de conteúdo. Tente descrever de outra forma.",
+      });
+    } else {
+      res.status(500).json({ error: "Erro ao gerar imagem. Tente novamente." });
+    }
+    return;
   }
 
   // Remove background (works regardless of whether the API returned transparency)
