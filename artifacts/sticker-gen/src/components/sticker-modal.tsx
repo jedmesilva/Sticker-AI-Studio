@@ -81,7 +81,7 @@ export function StickerModal({ sticker, onClose }: StickerModalProps) {
               <X className="w-4 h-4 text-foreground" />
             </button>
 
-            <div className="bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 p-8 flex items-center justify-center">
+            <div className="bg-checkerboard p-8 flex items-center justify-center">
               <img
                 src={`data:image/png;base64,${sticker.imageData}`}
                 alt={sticker.prompt}
