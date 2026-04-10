@@ -9,6 +9,28 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=24173 BASE_PATH=/ pnpm --filter @workspace/sticker-gen run dev & PORT=8080 pnpm --filter @workspace/api-server run dev"
+waitForPort = 24173
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -42,3 +64,6 @@ externalPort = 3002
 
 [userenv.shared]
 SUPABASE_URL = "https://bbvngusrnniogdptzayw.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJidm5ndXNybm5pb2dkcHR6YXl3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTc4NjY2NCwiZXhwIjoyMDkxMzYyNjY0fQ.3ORnCnABIxerikS4JLiHEWGsJDGWxXKQ3kHp2BK63-Q"
+SUPABASE_DATABASE_URL = "postgresql://postgres:A0EPg9bfq2fwmF3t@db.bbvngusrnniogdptzayw.supabase.co:5432/postgres"
+SUPABASE_ACESS_TOKEN = "sbp_7011e10c2677f0c38819208ded79bebff9da0ac0"
