@@ -6,4 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from "./apiError";
+export * from "./createStickerBody";
+export * from "./generateOpenaiImageBody";
+export * from "./generateOpenaiImageBodySize";
+export * from "./generateOpenaiImageResponse";
+export * from "./getRecentStickersParams";
 export * from "./healthStatus";
+export * from "./sticker";

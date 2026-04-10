@@ -8,3 +8,42 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface Sticker {
+  id: number;
+  prompt: string;
+  /** Base64 encoded image data */
+  imageData: string;
+  createdAt: string;
+}
+
+export interface CreateStickerBody {
+  prompt: string;
+  imageData: string;
+}
+
+export type GenerateOpenaiImageBodySize =
+  (typeof GenerateOpenaiImageBodySize)[keyof typeof GenerateOpenaiImageBodySize];
+
+export const GenerateOpenaiImageBodySize = {
+  "1024x1024": "1024x1024",
+  "512x512": "512x512",
+  "256x256": "256x256",
+} as const;
+
+export interface GenerateOpenaiImageBody {
+  prompt: string;
+  size?: GenerateOpenaiImageBodySize;
+}
+
+export interface GenerateOpenaiImageResponse {
+  b64_json: string;
+}
+
+export interface ApiError {
+  error: string;
+}
+
+export type GetRecentStickersParams = {
+  limit?: number;
+};

@@ -5,18 +5,29 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  ApiError,
+  CreateStickerBody,
+  GenerateOpenaiImageBody,
+  GenerateOpenaiImageResponse,
+  GetRecentStickersParams,
+  HealthStatus,
+  Sticker,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +110,431 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary List all generated stickers
+ */
+export const getListStickersUrl = () => {
+  return `/api/stickers`;
+};
+
+export const listStickers = async (
+  options?: RequestInit,
+): Promise<Sticker[]> => {
+  return customFetch<Sticker[]>(getListStickersUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListStickersQueryKey = () => {
+  return [`/api/stickers`] as const;
+};
+
+export const getListStickersQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStickers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStickers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListStickersQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listStickers>>> = ({
+    signal,
+  }) => listStickers({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStickers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListStickersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listStickers>>
+>;
+export type ListStickersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all generated stickers
+ */
+
+export function useListStickers<
+  TData = Awaited<ReturnType<typeof listStickers>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listStickers>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListStickersQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Save a generated sticker
+ */
+export const getCreateStickerUrl = () => {
+  return `/api/stickers`;
+};
+
+export const createSticker = async (
+  createStickerBody: CreateStickerBody,
+  options?: RequestInit,
+): Promise<Sticker> => {
+  return customFetch<Sticker>(getCreateStickerUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createStickerBody),
+  });
+};
+
+export const getCreateStickerMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSticker>>,
+    TError,
+    { data: BodyType<CreateStickerBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createSticker>>,
+  TError,
+  { data: BodyType<CreateStickerBody> },
+  TContext
+> => {
+  const mutationKey = ["createSticker"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createSticker>>,
+    { data: BodyType<CreateStickerBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createSticker(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateStickerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createSticker>>
+>;
+export type CreateStickerMutationBody = BodyType<CreateStickerBody>;
+export type CreateStickerMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Save a generated sticker
+ */
+export const useCreateSticker = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createSticker>>,
+    TError,
+    { data: BodyType<CreateStickerBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createSticker>>,
+  TError,
+  { data: BodyType<CreateStickerBody> },
+  TContext
+> => {
+  return useMutation(getCreateStickerMutationOptions(options));
+};
+
+/**
+ * @summary Delete a sticker
+ */
+export const getDeleteStickerUrl = (id: number) => {
+  return `/api/stickers/${id}`;
+};
+
+export const deleteSticker = async (
+  id: number,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteStickerUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteStickerMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSticker>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteSticker>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["deleteSticker"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteSticker>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteSticker(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteStickerMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteSticker>>
+>;
+
+export type DeleteStickerMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Delete a sticker
+ */
+export const useDeleteSticker = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSticker>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteSticker>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getDeleteStickerMutationOptions(options));
+};
+
+/**
+ * @summary Get most recently generated stickers
+ */
+export const getGetRecentStickersUrl = (params?: GetRecentStickersParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/stickers/recent?${stringifiedParams}`
+    : `/api/stickers/recent`;
+};
+
+export const getRecentStickers = async (
+  params?: GetRecentStickersParams,
+  options?: RequestInit,
+): Promise<Sticker[]> => {
+  return customFetch<Sticker[]>(getGetRecentStickersUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetRecentStickersQueryKey = (
+  params?: GetRecentStickersParams,
+) => {
+  return [`/api/stickers/recent`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetRecentStickersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRecentStickers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetRecentStickersParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRecentStickers>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetRecentStickersQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getRecentStickers>>
+  > = ({ signal }) => getRecentStickers(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRecentStickers>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetRecentStickersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRecentStickers>>
+>;
+export type GetRecentStickersQueryError = ErrorType<unknown>;
+
+/**
+ * @summary Get most recently generated stickers
+ */
+
+export function useGetRecentStickers<
+  TData = Awaited<ReturnType<typeof getRecentStickers>>,
+  TError = ErrorType<unknown>,
+>(
+  params?: GetRecentStickersParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getRecentStickers>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetRecentStickersQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Generate a sticker image from a text prompt
+ */
+export const getGenerateOpenaiImageUrl = () => {
+  return `/api/openai/generate-image`;
+};
+
+export const generateOpenaiImage = async (
+  generateOpenaiImageBody: GenerateOpenaiImageBody,
+  options?: RequestInit,
+): Promise<GenerateOpenaiImageResponse> => {
+  return customFetch<GenerateOpenaiImageResponse>(getGenerateOpenaiImageUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateOpenaiImageBody),
+  });
+};
+
+export const getGenerateOpenaiImageMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateOpenaiImage>>,
+    TError,
+    { data: BodyType<GenerateOpenaiImageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateOpenaiImage>>,
+  TError,
+  { data: BodyType<GenerateOpenaiImageBody> },
+  TContext
+> => {
+  const mutationKey = ["generateOpenaiImage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateOpenaiImage>>,
+    { data: BodyType<GenerateOpenaiImageBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateOpenaiImage(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateOpenaiImageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateOpenaiImage>>
+>;
+export type GenerateOpenaiImageMutationBody = BodyType<GenerateOpenaiImageBody>;
+export type GenerateOpenaiImageMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Generate a sticker image from a text prompt
+ */
+export const useGenerateOpenaiImage = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateOpenaiImage>>,
+    TError,
+    { data: BodyType<GenerateOpenaiImageBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateOpenaiImage>>,
+  TError,
+  { data: BodyType<GenerateOpenaiImageBody> },
+  TContext
+> => {
+  return useMutation(getGenerateOpenaiImageMutationOptions(options));
+};

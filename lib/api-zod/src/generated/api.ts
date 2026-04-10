@@ -14,3 +14,58 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all generated stickers
+ */
+export const ListStickersResponseItem = zod.object({
+  id: zod.number(),
+  prompt: zod.string(),
+  imageData: zod.string().describe("Base64 encoded image data"),
+  createdAt: zod.coerce.date(),
+});
+export const ListStickersResponse = zod.array(ListStickersResponseItem);
+
+/**
+ * @summary Save a generated sticker
+ */
+export const CreateStickerBody = zod.object({
+  prompt: zod.string(),
+  imageData: zod.string(),
+});
+
+/**
+ * @summary Delete a sticker
+ */
+export const DeleteStickerParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Get most recently generated stickers
+ */
+export const GetRecentStickersQueryParams = zod.object({
+  limit: zod.coerce.number().optional(),
+});
+
+export const GetRecentStickersResponseItem = zod.object({
+  id: zod.number(),
+  prompt: zod.string(),
+  imageData: zod.string().describe("Base64 encoded image data"),
+  createdAt: zod.coerce.date(),
+});
+export const GetRecentStickersResponse = zod.array(
+  GetRecentStickersResponseItem,
+);
+
+/**
+ * @summary Generate a sticker image from a text prompt
+ */
+export const GenerateOpenaiImageBody = zod.object({
+  prompt: zod.string(),
+  size: zod.enum(["1024x1024", "512x512", "256x256"]).optional(),
+});
+
+export const GenerateOpenaiImageResponse = zod.object({
+  b64_json: zod.string(),
+});
