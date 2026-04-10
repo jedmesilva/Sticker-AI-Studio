@@ -136,22 +136,24 @@ export default function Home() {
             <span>StickerAI Magic</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-display font-bold text-foreground max-w-3xl leading-tight">
-            Imagine a sticker... <br />
-            <span className="text-muted-foreground font-normal text-4xl md:text-5xl flex items-center justify-center gap-2 mt-2 h-[1.2em] overflow-hidden relative">
-              like{" "}
-              <AnimatePresence mode="popLayout">
-                <motion.span
-                  key={ideaIndex}
-                  initial={{ y: 40, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -40, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  className="text-primary font-bold inline-block"
-                >
-                  "{IDEAS[ideaIndex]}"
-                </motion.span>
-              </AnimatePresence>
-            </span>
+            Imagine a sticker...
+            <div className="mt-3 flex flex-col items-center gap-1">
+              <span className="text-muted-foreground font-normal text-2xl md:text-3xl">like</span>
+              <div className="overflow-hidden w-full flex justify-center">
+                <AnimatePresence mode="popLayout">
+                  <motion.span
+                    key={ideaIndex}
+                    initial={{ y: 40, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -40, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="text-primary font-bold text-3xl md:text-5xl inline-block text-center px-2"
+                  >
+                    "{IDEAS[ideaIndex]}"
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+            </div>
           </h1>
           <p className="text-xl text-muted-foreground max-w-xl mx-auto pt-4 font-sans">
             Descreva qualquer coisa e nossa máquina mágica vai criar um sticker fofo na hora.
