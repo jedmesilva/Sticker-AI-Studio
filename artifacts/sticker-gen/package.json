@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@clerk/react": "^6.2.1",
     "@supabase/supabase-js": "^2.103.0"
   }
 }

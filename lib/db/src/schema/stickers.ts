@@ -4,6 +4,7 @@ import { z } from "zod/v4";
 
 export const stickersTable = pgTable("stickers", {
   id: serial("id").primaryKey(),
+  userId: text("user_id"),
   prompt: text("prompt").notNull(),
   imageData: text("image_data").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

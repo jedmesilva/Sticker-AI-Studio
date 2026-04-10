@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Sparkles, Loader2, Trash2, Wand2, ImagePlus, X as XIcon } from "lucide-react";
+import { Sparkles, Loader2, Trash2, Wand2, ImagePlus, X as XIcon, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, useClerk } from "@clerk/react";
 import {
   useListStickers,
   useCreateSticker,
@@ -42,6 +43,8 @@ export default function Home() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   const { data: stickers, isLoading: isLoadingStickers } = useListStickers();
   const generateImage = useGenerateOpenaiImage();
@@ -123,9 +126,44 @@ export default function Home() {
   const fillPrompt = (text: string) => form.setValue("prompt", text);
   const isGenerating = generateImage.isPending || createSticker.isPending;
 
+  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || "Usuário";
+  const avatarUrl = user?.imageUrl;
+
   return (
     <div className="min-h-[100dvh] bg-background selection:bg-primary/30">
       <StickerModal sticker={selectedSticker} onClose={() => setSelectedSticker(null)} />
+
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            <span className="font-display font-bold text-lg text-foreground">StickerAI</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border border-border/50">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={displayName} className="w-6 h-6 rounded-full object-cover" />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-primary" />
+                </div>
+              )}
+              <span className="text-sm font-medium text-foreground hidden sm:block">{displayName}</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => signOut()}
+              className="text-muted-foreground hover:text-foreground gap-1.5"
+              data-testid="button-sign-out"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
+          </div>
+        </div>
+      </header>
 
       <main className="max-w-5xl mx-auto px-6 py-12 md:py-24 flex flex-col items-center">
 
