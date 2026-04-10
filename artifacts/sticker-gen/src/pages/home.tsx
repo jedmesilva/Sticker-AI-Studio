@@ -189,12 +189,12 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="relative flex flex-col sm:flex-row gap-3">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="relative flex flex-col sm:flex-row gap-3 items-stretch">
             <div className="relative flex-1">
               <Input
                 {...form.register("prompt")}
                 placeholder="Que sticker você quer criar?"
-                className="w-full text-lg py-7 pl-6 pr-14 rounded-3xl border-2 border-primary/20 shadow-sm bg-white/80 backdrop-blur-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary transition-all placeholder:text-muted-foreground"
+                className="w-full h-14 text-base pl-5 pr-12 rounded-2xl border-2 border-primary/20 shadow-sm bg-white/80 backdrop-blur-xl focus-visible:ring-4 focus-visible:ring-primary/20 focus-visible:border-primary transition-all placeholder:text-muted-foreground"
                 autoComplete="off"
                 disabled={isGenerating}
                 data-testid="input-prompt"
@@ -211,23 +211,23 @@ export default function Home() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isGenerating}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
                 title="Adicionar imagem de referência"
                 data-testid="button-upload-reference"
               >
-                <ImagePlus className="w-5 h-5" />
+                <ImagePlus className="w-4 h-4" />
               </button>
             </div>
             <Button
               type="submit"
               disabled={isGenerating || !form.watch("prompt")}
-              className="py-7 px-8 rounded-3xl text-lg font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="h-14 px-7 rounded-2xl text-base font-bold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground whitespace-nowrap"
               data-testid="button-generate"
             >
               {isGenerating ? (
-                <><Loader2 className="w-6 h-6 mr-2 animate-spin" />Gerando...</>
+                <><Loader2 className="w-5 h-5 mr-2 animate-spin" />Gerando...</>
               ) : (
-                <><Wand2 className="w-6 h-6 mr-2" />Make it!</>
+                <><Wand2 className="w-5 h-5 mr-2" />Make it!</>
               )}
             </Button>
           </form>
